@@ -136,3 +136,14 @@ def test_news_daily_counts_saturation():
     assert c[today] == 2 and c[today - _td(days=2)] == 1 and c[today - _td(days=1)] == 0 and len(c) == 7
     sat = daily_counts([entry(0, h % 24) for h in range(100)], today)
     assert list(sat) == [today] and sat[today] > 90
+
+
+def test_decoder_build():
+    from app.db import SessionLocal
+    from app.decoder import build
+
+    with SessionLocal() as db:
+        d = build(db)
+    assert d["themes"] and d["overton"]
+    assert {t["bucket"] for t in d["themes"]} <= {"rumore", "silenzio", "allineato"}
+    assert any(t["alternative"] for t in d["themes"] + d["overton"])

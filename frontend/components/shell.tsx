@@ -10,6 +10,7 @@ import { ThemeToggle } from "./theme";
 const NAV = [
   { href: "/", label: "Radar", icon: IconRadar },
   { href: "/temi/", label: "Temi", icon: IconLayers },
+  { href: "/decoder/", label: "Decoder", icon: IconLens },
   { href: "/journal/", label: "Journal", icon: IconLog },
   { href: "/altro/", label: "Altro", icon: IconMore },
 ];
@@ -18,7 +19,7 @@ function isActive(path: string, href: string) {
   if (href === "/") return path === "/";
   const base = href.replace(/\/$/, "");
   if (base === "/temi") return path.startsWith("/temi") || path.startsWith("/tema");
-  if (base === "/altro") return path.startsWith("/altro") || path.startsWith("/fonti");
+  if (base === "/altro") return path.startsWith("/altro") || path.startsWith("/fonti") || path.startsWith("/guida");
   return path.startsWith(base);
 }
 
@@ -96,7 +97,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-paper/95 backdrop-blur-md border-t border-rule safe-bottom"
         aria-label="Sezioni principali"
       >
-        <ul className="grid grid-cols-4">
+        <ul className="grid grid-cols-5">
           {NAV.map((l) => {
             const on = isActive(path, l.href);
             const Icon = l.icon;
@@ -105,9 +106,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 <Link
                   href={l.href}
                   aria-current={on ? "page" : undefined}
-                  className={`flex flex-col items-center justify-center gap-0.5 min-h-[58px] text-[0.72rem] ${on ? "text-ink" : "text-muted"}`}
+                  className={`flex flex-col items-center justify-center gap-0.5 min-h-[58px] text-[0.7rem] ${on ? "text-ink" : "text-muted"}`}
                 >
-                  <span className={`grid place-items-center w-14 h-7 rounded-full transition-colors ${on ? "bg-seaglass-soft text-seaglass" : ""}`}>
+                  <span className={`grid place-items-center w-12 h-7 rounded-full transition-colors ${on ? "bg-seaglass-soft text-seaglass" : ""}`}>
                     <Icon />
                   </span>
                   <span className={on ? "font-semibold" : ""}>{l.label}</span>
@@ -174,6 +175,14 @@ function IconLog() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden>
       <path d="M4 19V5M4 19h16" />
       <path d="m7 15 4-4 3 3 5-6" />
+    </svg>
+  );
+}
+function IconLens() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="3.2" />
     </svg>
   );
 }

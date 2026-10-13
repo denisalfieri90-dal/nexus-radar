@@ -11,8 +11,6 @@ declare global {
   }
 }
 
-/** Script nel <head>: cattura l'invito all'installazione di Android anche se arriva prima di React. */
-export const installBootScript = `window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__nexusInstall=e;window.dispatchEvent(new Event('nexus-install-ready'))});`;
 
 const DISMISS_KEY = "nexus-install-dismissed";
 

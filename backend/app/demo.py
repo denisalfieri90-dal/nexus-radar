@@ -99,6 +99,15 @@ def seed(db: Session) -> str:
                 upsert_metric(db, f"edgar:{a.ticker}:form4_base30", today, rng.uniform(1, 4), "demo")
                 upsert_metric(db, f"edgar:{a.ticker}:sched13_90d", today, rng.choice([0, 0, 0, 1, 2]), "demo")
                 upsert_metric(db, f"edgar:{a.ticker}:8k_30d", today, rng.randint(0, 5), "demo")
+    for i, (src, title) in enumerate([
+        ("ZeroHedge", "[DEMO] Central banks keep buying gold while the dollar story cracks"),
+        ("Scenari Economici", "[DEMO] Euro digitale: cosa cambia davvero per il contante"),
+        ("Doomberg", "[DEMO] Uranium enrichment is the bottleneck nobody prices"),
+        ("Naked Capitalism", "[DEMO] Defense spending boom: who writes the narrative?"),
+        ("Lyn Alden", "[DEMO] Bitcoin, stablecoins and the Treasury market"),
+    ]):
+        db.add(NewsItem(source=f"rss:{src}", channel="contrarian", title=title, url=f"https://example.com/demo/alt/{i}",
+                        domain="example.com", published_at=datetime.utcnow() - timedelta(hours=3 * i + 1)))
     for b in ("SPY",):
         px = 500.0
         for i in range(400):

@@ -6,8 +6,6 @@ export type ThemeChoice = "light" | "system" | "dark";
 const KEY = "nexus-theme";
 const COLORS = { light: "#e9ede7", dark: "#0b1d2b" };
 
-/** Script eseguito prima del primo disegno: niente lampo di tema sbagliato. */
-export const themeBootScript = `(function(){try{var t=localStorage.getItem('${KEY}');if(t==='"light"'||t==='"dark"'){document.documentElement.dataset.theme=JSON.parse(t)}}catch(e){}})();`;
 
 function apply(choice: ThemeChoice) {
   const root = document.documentElement;

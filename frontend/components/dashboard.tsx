@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Health, NewsItem, Point, RadarRow, num, pct, stamp, useData, when } from "@/lib/api";
+import { entryOfTheDay } from "@/lib/almanac";
 import { RadarChart } from "./radar-chart";
 import { Empty, ErrorBox, Flags, Loading, NoData, QuadrantTag, Sparkline } from "./ui";
 
@@ -40,9 +41,12 @@ export function Dashboard() {
   return (
     <>
       <section className="pt-8 md:pt-12 pb-6">
-        <p className="text-sm text-muted rise">
-          {new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
-          {health.data?.exported_at ? `, dati delle ${stamp(health.data.exported_at).split(", ").pop()}` : ""}
+        <p className="text-sm text-muted rise flex flex-wrap gap-x-3">
+          <span>
+            {new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
+            {health.data?.exported_at ? `, dati delle ${stamp(health.data.exported_at).split(", ").pop()}` : ""}
+          </span>
+          <Link href="/guida/" className="underline">Come si usa</Link>
         </p>
         <div className="mt-3 grid lg:grid-cols-[1fr_auto] gap-6 items-end">
           <h1 className="display text-[clamp(2.7rem,8vw,5.4rem)] max-w-[13ch] rise">Dove la sostanza arriva prima del rumore</h1>
@@ -110,6 +114,8 @@ export function Dashboard() {
           </ul>
         </aside>
       </section>
+
+      <TodayTeaser />
 
       <section className="mt-14" aria-labelledby="top">
         <h2 id="top" className="display text-[2.2rem] mb-4">Le asimmetrie più alte</h2>
@@ -224,6 +230,18 @@ export function Dashboard() {
         </div>
       </section>
     </>
+  );
+}
+
+function TodayTeaser() {
+  const e = entryOfTheDay();
+  return (
+    <Link href="/decoder/" className="mt-12 block rounded-2xl bg-ink text-paper px-5 md:px-7 py-5 hover:opacity-95" aria-label={`Curiosità del giorno: ${e.title}`}>
+      <span className="text-sm opacity-80">Curiosità del giorno nel Decoder</span>
+      <span className="display text-[1.9rem] md:text-[2.3rem] block mt-1">{e.title}</span>
+      <span className="block mt-1 opacity-90 max-w-[60ch]">{e.question}</span>
+      <span className="inline-flex items-center gap-1 mt-3 text-sm font-semibold underline">Leggi la storia e i temi collegati</span>
+    </Link>
   );
 }
 

@@ -94,6 +94,15 @@ export function SettingsView() {
       <Section title="Dati">
         <ul className="divide-y divide-rule border-y border-rule">
           <li>
+            <Link href="/guida/" className="flex items-center min-h-14 gap-3">
+              <span className="flex-1">
+                Come si usa Nexus
+                <span className="block text-sm text-muted">Le aree, la routine di cinque minuti, il glossario</span>
+              </span>
+              <Chevron />
+            </Link>
+          </li>
+          <li>
             <Link href="/fonti/" className="flex items-center min-h-14 gap-3">
               <span className="flex-1">
                 Stato delle fonti

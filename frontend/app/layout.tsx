@@ -2,8 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import "./globals.css";
 import { Shell } from "@/components/shell";
-import { themeBootScript } from "@/components/theme";
-import { installBootScript } from "@/components/install";
+import { installBootScript, themeBootScript } from "@/lib/boot";
 
 export const metadata: Metadata = {
   title: { default: "Nexus Radar", template: "%s | Nexus" },

@@ -47,6 +47,9 @@ def export(db: Session, out: str | Path) -> int:
 
     benches = sorted({t.benchmark for t in THEMES} | {"SPY"})
     put("benchmarks.json", {b: [{"day": d.isoformat(), "value": round(v, 4)} for d, v in series(db, f"px:{b}", 400)] for b in benches})
+    from .decoder import build as build_decoder
+
+    put("decoder.json", build_decoder(db))
     put("geo.json", api.geo(db))
     put("macro.json", api.macro(db))
     put("feed.json", api.feed(channel=None, limit=120, db=db))

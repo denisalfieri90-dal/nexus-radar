@@ -11,12 +11,20 @@ feeds:
   - {name: Defense One, url: "https://www.defenseone.com/rss/all/", channel: defense_cyber}
   - {name: SpaceNews, url: "https://spacenews.com/feed/", channel: space}
   # --- Commodity ed energia ---
-  - {name: Mining.com, url: "https://www.mining.com/feed/", channel: metals}
   - {name: OilPrice, url: "https://oilprice.com/rss/main", channel: energy}
   # --- Crypto ---
   - {name: CoinDesk, url: "https://www.coindesk.com/arc/outboundfeeds/rss/", channel: crypto}
   # --- Tecnologia e ricerca (segnali di adozione precoce) ---
   - {name: Hacker News, url: "https://hnrss.org/frontpage", channel: tech}
   - {name: arXiv quant-ph, url: "https://export.arxiv.org/rss/quant-ph", channel: quantum}
-  # --- Contro-narrazione (letta come segnale di sentiment, non come fonte di fatti) ---
+  # --- Contro-narrazione e letture "dietro le quinte" ---
+  # Letta come segnale di sentiment e come fonte di domande, non come fonte di fatti.
+  # Per aggiungere un canale YouTube (es. Influenzamentale) usa il suo feed:
+  #   https://www.youtube.com/feeds/videos.xml?channel_id=<ID del canale>
   - {name: ZeroHedge, url: "https://feeds.feedburner.com/zerohedge/feed", channel: contrarian}
+  - {name: Naked Capitalism, url: "https://www.nakedcapitalism.com/feed", channel: contrarian}
+  - {name: Doomberg, url: "https://doomberg.substack.com/feed", channel: contrarian}
+  - {name: Lyn Alden, url: "https://www.lynalden.com/feed/", channel: contrarian}
+  - {name: Scenari Economici, url: "https://scenarieconomici.it/feed/", channel: contrarian}
+  # --- Mainstream italiano, per confronto ---
+  - {name: ANSA Economia, url: "https://www.ansa.it/sito/notizie/economia/economia_rss.xml", channel: mainstream}
