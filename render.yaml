@@ -1,0 +1,48 @@
+# Blueprint Render, tutto su piani gratuiti.
+#  - nexus-radar: il sito (Static Site, sempre acceso, su CDN), pubblicato dal branch `site`
+#    che la pipeline GitHub Actions ricostruisce ogni due ore.
+#  - nexus-brain: servizio per i briefing su richiesta (Web Service free: si addormenta dopo
+#    15 minuti di inattività, la prima richiesta impiega circa un minuto).
+
+services:
+  - type: web
+    name: nexus-radar
+    runtime: static
+    branch: site
+    buildCommand: "true"
+    staticPublishPath: .
+    headers:
+      - path: /data/*
+        name: Cache-Control
+        value: no-cache
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+      - path: /_next/static/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+
+  - type: web
+    name: nexus-brain
+    runtime: python
+    plan: free
+    branch: main
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_URL
+        value: sqlite:///./nexus.db
+      - key: DB_SNAPSHOT_URL
+        sync: false # https://raw.githubusercontent.com/<owner>/<repo>/data/nexus.db
+      - key: CORS_ORIGINS
+        sync: false # URL del sito, es. https://nexus-radar.onrender.com
+      - key: ACCESS_CODE
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-5-5

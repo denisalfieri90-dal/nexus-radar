@@ -1,0 +1,241 @@
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/source-serif-4/opsz.css";
+@import "tailwindcss";
+
+/* Palette "carta nautica": il radar come una carta batimetrica.
+   Le zone profonde e silenziose (stealth) sono il punto d'interesse.
+   Tema chiaro = carta stampata; tema scuro = schermo di plancia notturno. */
+:root {
+  color-scheme: light;
+  --paper: #e9ede7;
+  --paper-2: #dde4de;
+  --paper-3: #d1dad5;
+  --ink: #0f2a3b;
+  --muted: #536772;
+  --rule: #c2cecc;
+  --contour: #a7c1c5;
+  --depth: #275f7a;
+  --seaglass: #1b6b58;
+  --seaglass-soft: #cfe3da;
+  --sand: #9a7524;
+  --buoy: #b83a26;
+  --buoy-soft: #f1d6cf;
+  --focus: #275f7a;
+  --glow: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0b1d2b;
+    --paper-2: #112738;
+    --paper-3: #183247;
+    --ink: #e4ecea;
+    --muted: #8ea4ae;
+    --rule: #20405a;
+    --contour: #1f4258;
+    --depth: #74b6d6;
+    --seaglass: #5fd0b0;
+    --seaglass-soft: #12382f;
+    --sand: #e0bb62;
+    --buoy: #f0806a;
+    --buoy-soft: #3b1f1b;
+    --focus: #74b6d6;
+    --glow: rgba(95, 208, 176, 0.35);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0b1d2b;
+  --paper-2: #112738;
+  --paper-3: #183247;
+  --ink: #e4ecea;
+  --muted: #8ea4ae;
+  --rule: #20405a;
+  --contour: #1f4258;
+  --depth: #74b6d6;
+  --seaglass: #5fd0b0;
+  --seaglass-soft: #12382f;
+  --sand: #e0bb62;
+  --buoy: #f0806a;
+  --buoy-soft: #3b1f1b;
+  --focus: #74b6d6;
+  --glow: rgba(95, 208, 176, 0.35);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-contour: var(--contour);
+  --color-depth: var(--depth);
+  --color-seaglass: var(--seaglass);
+  --color-seaglass-soft: var(--seaglass-soft);
+  --color-sand: var(--sand);
+  --color-buoy: var(--buoy);
+  --color-buoy-soft: var(--buoy-soft);
+  --font-sans: "Archivo Variable", system-ui, sans-serif;
+  --font-serif: "Source Serif 4 Variable", Georgia, serif;
+}
+
+html {
+  background: var(--paper);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.display {
+  font-stretch: 70%;
+  font-weight: 780;
+  letter-spacing: -0.012em;
+  line-height: 0.94;
+}
+
+.condensed {
+  font-stretch: 82%;
+}
+
+.prose-brief {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  max-width: 68ch;
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 0.25rem);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Il momento d'ingresso del radar: un fascio che spazza la carta e accende i punti --- */
+@keyframes sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes beam {
+  0% {
+    transform: rotate(-12deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(96deg);
+    opacity: 0;
+  }
+}
+
+@keyframes nexus-blip {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.beam {
+  transform-box: view-box;
+  animation: beam 1.6s cubic-bezier(0.45, 0.05, 0.4, 1) forwards;
+}
+
+.blip {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: nexus-blip 0.55s ease-out forwards;
+}
+
+.blip-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: ring 1.4s ease-out forwards;
+}
+
+.rise {
+  animation: rise 0.5s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition: none !important;
+  }
+  .beam,
+  .blip-ring {
+    display: none;
+  }
+}

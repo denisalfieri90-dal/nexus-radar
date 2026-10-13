@@ -1,0 +1,110 @@
+# Pipeline dati di Nexus (gratuita su repository pubblico).
+#  1. riprende il database dall'ultimo giro (branch `data`)
+#  2. raccoglie le fonti, ricalcola i punteggi, aggiorna il journal, genera i briefing automatici
+#  3. esporta i JSON statici e compila il sito
+#  4. pubblica il database sul branch `data` e il sito sul branch `site` (Render lo serve da lì)
+name: Pipeline dati
+
+on:
+  schedule:
+    - cron: "17 */2 * * *" # notizie e attenzione mediatica ogni 2 ore
+    - cron: "40 5 * * *" # mercati, filing, contratti, macro: ogni mattina (07:40 ora di Roma)
+  workflow_dispatch:
+    inputs:
+      group:
+        description: "Gruppo di job (all, news, daily, nessuno = solo ricompilare il sito)"
+        default: all
+        required: false
+  push:
+    branches: [main]
+    paths: ["frontend/**", "backend/app/export.py", ".github/workflows/pipeline.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: sqlite:///./nexus.db
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT || format('NexusRadar {0}@users.noreply.github.com', github.repository_owner) }}
+      CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL || 'claude-sonnet-5-5' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Riprendi il database dall'ultimo giro
+        run: |
+          if git fetch --depth=1 origin data:data 2>/dev/null; then
+            git show data:nexus.db > backend/nexus.db && echo "Database ripreso ($(du -h backend/nexus.db | cut -f1))"
+          else
+            echo "Primo avvio: database nuovo"
+          fi
+
+      - name: Scegli i job
+        id: plan
+        run: |
+          if [ ! -s backend/nexus.db ]; then G=all
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then G="${{ inputs.group }}"
+          elif [ "${{ github.event_name }}" = "push" ]; then G=nessuno
+          elif [ "${{ github.event.schedule }}" = "40 5 * * *" ]; then G=daily
+          else G=news; fi
+          echo "group=$G" >> "$GITHUB_OUTPUT"
+          echo "Gruppo: $G"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Installa il backend
+        run: pip install -r backend/requirements.txt
+
+      - name: Raccogli e calcola
+        if: steps.plan.outputs.group != 'nessuno' && steps.plan.outputs.group != ''
+        working-directory: backend
+        run: |
+          python -m app.cli run ${{ steps.plan.outputs.group }}
+          if [ "${{ steps.plan.outputs.group }}" != "news" ]; then python -m app.cli brief-top 3; fi
+
+      - name: Esporta i dati per il sito
+        working-directory: backend
+        run: python -m app.cli export ../frontend/public/data
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Compila il sito
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_BRAIN_URL: ${{ vars.BRAIN_URL }}
+          NEXT_PUBLIC_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Pubblica database (branch data) e sito (branch site)
+        run: |
+          publish() { # $1 = cartella, $2 = branch
+            cd "$1"
+            git init -q -b "$2"
+            git config user.name "nexus-pipeline"
+            git config user.email "nexus-pipeline@users.noreply.github.com"
+            git add -A
+            git commit -qm "Aggiornamento $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push -qf "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" "$2:$2"
+            cd - >/dev/null
+          }
+          mkdir -p /tmp/data && cp backend/nexus.db /tmp/data/ && publish /tmp/data data
+          touch frontend/out/.nojekyll && publish frontend/out site
