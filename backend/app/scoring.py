@@ -68,6 +68,18 @@ def series(db: Session, key: str, days: int) -> list[tuple[date, float]]:
     return [(d, v) for d, v in rows]
 
 
+def attention_series(db: Session, channel: str, days: int = 95) -> tuple[list[tuple[date, float]], str]:
+    """Serie di attenzione mediatica: GDELT se ha una storia sufficiente, altrimenti il conteggio
+    di articoli da Google/Bing News accumulato giro dopo giro."""
+    g = series(db, f"attention:{channel}", days)
+    if len(g) >= 30:
+        return g, "GDELT"
+    n = series(db, f"news:{channel}", days)
+    if n:
+        return n, "Google/Bing News"
+    return g, "GDELT"
+
+
 def latest(db: Session, key: str) -> float | None:
     return db.scalar(select(Metric.value).where(Metric.key == key).order_by(Metric.day.desc()).limit(1))
 
@@ -83,19 +95,25 @@ class ThemeFeatures:
     contracts_ratio: float | None = None  # spesa 90g / media trimestrale precedente
     contracts_90d: float | None = None
     tone_delta: float | None = None  # variazione del tono medio (ultimi 14g vs precedenti)
+    attention_source: str = "GDELT"
 
 
 def theme_features(db: Session, t: Theme) -> ThemeFeatures:
     f = ThemeFeatures()
-    att = [v for _, v in series(db, f"attention:{t.slug}", 95)]
-    if len(att) >= 30:
-        recent, base = att[-7:], att[:-7]
-        sd = pstdev(base) or 1e-9
-        f.attention_z = (mean(recent) - mean(base)) / sd
+    pts, f.attention_source = attention_series(db, t.slug)
+    att = [v for _, v in pts]
+    if att:
         f.attention_level = mean(att[-14:])
-        last30, prev30 = att[-30:], att[-60:-30] if len(att) >= 60 else att[:-30]
-        if prev30 and mean(prev30) > 0:
-            f.attention_accel = mean(last30) / mean(prev30)
+    if len(att) >= 14:
+        recent, base = att[-7:], att[:-7]
+        sd = pstdev(base) or max(mean(base) * 0.25, 1e-9)
+        f.attention_z = (mean(recent) - mean(base)) / sd
+        if len(att) >= 60:
+            last, prev = att[-30:], att[-60:-30]
+        else:
+            last, prev = att[-7:], att[-14:-7]
+        if prev and mean(prev) > 0:
+            f.attention_accel = mean(last) / mean(prev)
     tone = [v for _, v in series(db, f"tone:{t.slug}", 95)]
     if len(tone) >= 28:
         f.tone_delta = mean(tone[-14:]) - mean(tone[:-14])
@@ -116,7 +134,7 @@ def theme_scores(f: ThemeFeatures) -> dict:
     adoption_parts: list[float | None] = []
     if f.attention_accel is not None:
         adoption_parts.append(clamp(50 + 60 * (f.attention_accel - 1)))
-        ev.append(Evidence("Accelerazione dell'attenzione", f"{f.attention_accel:.2f}x (30g vs 30g prec.)", "GDELT",
+        ev.append(Evidence("Accelerazione dell'attenzione", f"{f.attention_accel:.2f}x (30g vs 30g prec.)", f.attention_source,
                            "in crescita" if f.attention_accel > 1.1 else "stabile o in calo"))
     else:
         adoption_parts.append(None)
@@ -142,11 +160,11 @@ def theme_scores(f: ThemeFeatures) -> dict:
     heat_parts: list[float | None] = []
     if f.attention_pct is not None:
         heat_parts.append(100 * f.attention_pct)
-        ev.append(Evidence("Volume di copertura (vs altri temi)", f"{f.attention_pct * 100:.0f}° percentile", "GDELT",
+        ev.append(Evidence("Volume di copertura (vs altri temi)", f"{f.attention_pct * 100:.0f}° percentile", f.attention_source,
                            "tema già mainstream" if f.attention_pct > 0.7 else "tema di nicchia" if f.attention_pct < 0.35 else "copertura intermedia"))
     if f.attention_z is not None:
         heat_parts.append(clamp(50 + 12 * max(-4.0, min(4.0, f.attention_z))))
-        ev.append(Evidence("Anomalia di copertura (7g vs storia)", f"z = {f.attention_z:+.2f}", "GDELT",
+        ev.append(Evidence("Anomalia di copertura (7g vs storia)", f"z = {f.attention_z:+.2f}", f.attention_source,
                            "picco mediatico in corso" if f.attention_z > 2 else "copertura sotto la norma" if f.attention_z < -0.5 else "nessun picco"))
     heat, _ = _avg(heat_parts)
     if f.tone_delta is not None:
@@ -272,10 +290,13 @@ def score_asset(a: AssetFeatures, th: dict) -> dict:
 def run(db: Session) -> str:
     run_id = datetime.utcnow().strftime("%Y%m%d%H%M%S") + uuid4().hex[:4]
     feats = {t.slug: theme_features(db, t) for t in THEMES}
-    levels = sorted(f.attention_level for f in feats.values() if f.attention_level is not None)
-    for f in feats.values():
-        if f.attention_level is not None and len(levels) > 1:
-            f.attention_pct = sum(lv < f.attention_level for lv in levels) / (len(levels) - 1)
+    # percentile calcolato solo tra temi misurati con la stessa fonte (scale diverse non si confrontano)
+    for src in {f.attention_source for f in feats.values()}:
+        group = [f for f in feats.values() if f.attention_source == src and f.attention_level is not None]
+        levels = sorted(f.attention_level for f in group)
+        for f in group:
+            if len(levels) > 1:
+                f.attention_pct = sum(lv < f.attention_level for lv in levels) / (len(levels) - 1)
     asset_rows: list[tuple[str, str, dict]] = []
     for t in THEMES:
         tf = feats[t.slug]

@@ -14,7 +14,7 @@ from .config import get_settings
 from .db import get_db, init_db
 from .llm import chokepoint_snapshot, macro_snapshot
 from .models import AssetSnapshot, Briefing, Contract, JournalEntry, Metric, NewsItem, Score, SourceRun
-from .scoring import latest_run_id, series
+from .scoring import attention_series, latest_run_id, series
 from .themes import CHOKEPOINTS, FRED_SERIES, THEMES, asset_by_ticker, theme_by_slug, theme_of_ticker
 
 logging.basicConfig(level=logging.INFO)
@@ -116,7 +116,7 @@ def themes_list(db: Session = Depends(get_db)):
     out = []
     for t in THEMES:
         s = scores.get(t.slug)
-        att = series(db, f"attention:{t.slug}", 95)
+        att, _ = attention_series(db, t.slug)
         out.append({
             "slug": t.slug, "name": t.name, "thesis_hint": t.thesis_hint, "module": t.module, "overton": t.overton,
             "tags": list(t.tags), "assets": [a.ticker for a in t.assets],
@@ -140,7 +140,8 @@ def theme_detail(slug: str, db: Session = Depends(get_db)):
         "slug": t.slug, "name": t.name, "thesis_hint": t.thesis_hint, "overton": t.overton, "tags": list(t.tags),
         "theme_score": next((_score_dict(s) for s in scores if s.entity_type == "theme"), None),
         "assets": [_score_dict(s) | {"name": (asset_by_ticker(s.entity_id) or t).name} for s in scores if s.entity_type == "asset"],
-        "attention": [{"day": d.isoformat(), "value": round(v, 3)} for d, v in series(db, f"attention:{slug}", 95)],
+        "attention": [{"day": d.isoformat(), "value": round(v, 3)} for d, v in attention_series(db, slug)[0]],
+        "attention_source": attention_series(db, slug)[1],
         "tone": [{"day": d.isoformat(), "value": round(v, 3)} for d, v in series(db, f"tone:{slug}", 95)],
         "news": [_news_dict(n) for n in news],
         "contracts": [{"award_id": c.award_id, "recipient": c.recipient, "agency": c.agency, "amount": c.amount,

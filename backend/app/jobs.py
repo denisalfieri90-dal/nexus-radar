@@ -1,7 +1,7 @@
 """Orchestrazione dei job di ingestione e calcolo."""
 import logging
 
-from .connectors import edgar, fred, gdelt, github, markets, rss, usaspending
+from .connectors import edgar, fred, gdelt, github, markets, newsrss, rss, usaspending
 from .db import SessionLocal
 from . import journal, scoring
 
@@ -21,6 +21,7 @@ def _wrap(fn):
 JOBS = {
     "rss": _wrap(rss.run),
     "gdelt": _wrap(gdelt.run),
+    "newsrss": _wrap(newsrss.run),
     "markets": _wrap(markets.run),
     "edgar": _wrap(edgar.run),
     "contracts": _wrap(usaspending.run),
@@ -33,9 +34,9 @@ JOBS = {
 
 # Gruppi pensati per il cron: le notizie spesso, il resto una o due volte al giorno.
 GROUPS = {
-    "news": ["rss", "gdelt", "score"],
+    "news": ["rss", "newsrss", "gdelt", "score"],
     "daily": ["markets", "edgar", "contracts", "github", "fred", "score", "journal_evaluate", "journal_autolog"],
-    "all": ["rss", "gdelt", "markets", "edgar", "contracts", "github", "fred", "score", "journal_evaluate", "journal_autolog"],
+    "all": ["rss", "newsrss", "gdelt", "markets", "edgar", "contracts", "github", "fred", "score", "journal_evaluate", "journal_autolog"],
 }
 
 

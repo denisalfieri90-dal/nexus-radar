@@ -121,3 +121,18 @@ def test_access_code_required():
             assert r.status_code == 400 and "ANTHROPIC" in r.json()["detail"]
     finally:
         settings.access_code = ""
+
+
+def test_news_daily_counts_saturation():
+    import time as _t
+    from datetime import date as _d, datetime as _dt, timedelta as _td
+
+    from app.connectors.newsrss import daily_counts
+
+    today = _d(2026, 10, 13)
+    def entry(days_ago, hour=12):
+        return {"published_parsed": (_dt(2026, 10, 13, hour) - _td(days=days_ago)).timetuple()}
+    c = daily_counts([entry(0), entry(0), entry(2)], today)
+    assert c[today] == 2 and c[today - _td(days=2)] == 1 and c[today - _td(days=1)] == 0 and len(c) == 7
+    sat = daily_counts([entry(0, h % 24) for h in range(100)], today)
+    assert list(sat) == [today] and sat[today] > 90

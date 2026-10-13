@@ -109,6 +109,7 @@ type ThemeDetail = {
   theme_score: Score | null;
   assets: (Score & { name: string })[];
   attention: Point[];
+  attention_source?: string;
   tone: Point[];
   news: NewsItem[];
   contracts: { award_id: string; recipient: string; agency: string; amount: number; start_date: string | null; description: string }[];
@@ -133,9 +134,13 @@ export function ThemeDetailView() {
 
       <div className="grid lg:grid-cols-[minmax(0,1fr)_300px] gap-10 mt-10">
         <section>
-          <h2 className="display text-[1.8rem] mb-2">Quota di copertura mediatica globale</h2>
+          <h2 className="display text-[1.8rem] mb-2">Copertura mediatica</h2>
           <LineChart points={data.attention} color="var(--buoy)" label="Attenzione mediatica" />
-          <p className="text-sm text-muted">Articoli sul tema ogni 100.000 monitorati da GDELT, media giornaliera.</p>
+          <p className="text-sm text-muted">
+            {data.attention_source === "GDELT"
+              ? "Articoli sul tema ogni 100.000 monitorati da GDELT, media giornaliera."
+              : "Articoli sul tema al giorno, contati da Google e Bing News. La storia cresce a ogni raccolta."}
+          </p>
           {data.tone.length > 0 && (
             <>
               <h2 className="display text-[1.8rem] mb-2 mt-8">Tono medio degli articoli</h2>

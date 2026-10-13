@@ -17,7 +17,7 @@ on:
         required: false
   push:
     branches: [main]
-    paths: ["frontend/**", "backend/app/export.py", ".github/workflows/pipeline.yml"]
+    paths: ["frontend/**", "backend/**", ".github/workflows/pipeline.yml"]
 
 permissions:
   contents: write
@@ -53,7 +53,7 @@ jobs:
         run: |
           if [ ! -s backend/nexus.db ]; then G=all
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then G="${{ inputs.group }}"
-          elif [ "${{ github.event_name }}" = "push" ]; then G=nessuno
+          elif [ "${{ github.event_name }}" = "push" ]; then G=news
           elif [ "${{ github.event.schedule }}" = "40 5 * * *" ]; then G=daily
           else G=news; fi
           echo "group=$G" >> "$GITHUB_OUTPUT"
@@ -73,7 +73,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         working-directory: backend
-        run: python -m app.cli run rss,gdelt
+        run: python -m app.cli run rss,newsrss,gdelt
 
       - name: Raccogli mercati, filing, contratti e macro
         if: steps.plan.outputs.group == 'all' || steps.plan.outputs.group == 'daily'

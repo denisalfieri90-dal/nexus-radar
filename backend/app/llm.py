@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from .config import get_settings
 from .models import Briefing, Contract, NewsItem, Score
-from .scoring import latest, latest_run_id, series
+from .scoring import attention_series, latest, latest_run_id, series
 from .themes import CHOKEPOINTS, FRED_SERIES, THEMES, asset_by_ticker, theme_by_slug, theme_of_ticker
 
 SYSTEM_PROMPT = (Path(__file__).parent / "prompts" / "system_prompt.md").read_text()
@@ -118,12 +118,12 @@ def chokepoint_snapshot(db: Session) -> list[dict]:
 
     out = []
     for k, cp in CHOKEPOINTS.items():
-        att = [v for _, v in series(db, f"attention:choke:{k}", 95)]
+        att = [v for _, v in attention_series(db, f"choke:{k}")[0]]
         tone = [v for _, v in series(db, f"tone:choke:{k}", 95)]
         z = None
-        if len(att) >= 30:
+        if len(att) >= 14:
             base = att[:-7]
-            z = (mean(att[-7:]) - mean(base)) / (pstdev(base) or 1e-9)
+            z = (mean(att[-7:]) - mean(base)) / (pstdev(base) or max(mean(base) * 0.25, 1e-9))
         head = _headlines(db, [f"choke:{k}"], days=3, limit=3)
         out.append({
             "chiave": k, "nome": cp["name"], "rilevanza": cp["why"],

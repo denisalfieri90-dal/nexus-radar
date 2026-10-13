@@ -74,7 +74,7 @@ def run(db: Session) -> None:
     # rotazione: se il tempo finisce, il giro successivo riparte dai temi rimasti indietro
     shift = (datetime.utcnow().hour // 2) % len(targets)
     targets = targets[shift:] + targets[:shift]
-    total, errors, done = 0, [], 0
+    total, errors, done, fails = 0, [], 0, 0
     started = time.monotonic()
     with client(timeout=20) as c:
         for channel, query, with_tone in targets:
@@ -92,8 +92,13 @@ def run(db: Session) -> None:
                     time.sleep(PAUSE)
                 total += _store_articles(db, channel, _articles(c, query))
                 db.commit()
+                fails = 0
                 time.sleep(PAUSE)
             except Exception as e:  # una fonte che fallisce non deve fermare le altre
                 db.rollback()
                 errors.append(f"{channel}: {e}")
+                fails += 1
+                if fails >= 3 and done == fails:
+                    errors.append("GDELT rifiuta le richieste da questo server: uso Google/Bing News come fonte di attenzione")
+                    break
     record_run(db, "gdelt", ok=len(errors) < len(targets), items=total, message="; ".join(errors))
