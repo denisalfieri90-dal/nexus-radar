@@ -119,7 +119,8 @@ Dopo 6-12 mesi il campione automatico ti dirà se i pesi funzionano. Se non funz
 
 | Fonte | Uso | Limiti |
 |---|---|---|
-| GDELT DOC 2.0 | attenzione, tono, titoli (65 lingue) | finestra di 3 mesi, ~1 richiesta ogni 5 s |
+| Google News / Bing News RSS | attenzione mediatica (articoli al giorno per tema) e titoli | la storia si accumula a ogni raccolta: lo z-score diventa affidabile dopo 2 settimane |
+| GDELT DOC 2.0 | attenzione, tono, titoli (65 lingue) | rifiuta gli IP dei runner GitHub: escluso dalla pipeline, utilizzabile in locale con `run gdelt` |
 | Feed RSS (`connectors/feeds.yaml`) | Fed, BCE, SEC, difesa, spazio, commodity, crypto, arXiv, ZeroHedge | gli URL cambiano: la pagina Fonti segnala i feed rotti |
 | Yahoo Finance (yfinance) | prezzi e volumi | non ufficiale, adatto alla ricerca e non all'esecuzione |
 | SEC EDGAR | Form 4, 13D/13G, 8-K | solo emittenti USA; Form 4 contato, non ancora diviso fra acquisti e vendite |

@@ -73,7 +73,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         working-directory: backend
-        run: python -m app.cli run rss,newsrss,gdelt
+        run: python -m app.cli run rss,newsrss
 
       - name: Raccogli mercati, filing, contratti e macro
         if: steps.plan.outputs.group == 'all' || steps.plan.outputs.group == 'daily'
