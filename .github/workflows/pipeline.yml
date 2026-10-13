@@ -88,7 +88,7 @@ jobs:
       - name: Compila il sito
         working-directory: frontend
         env:
-          NEXT_PUBLIC_BRAIN_URL: ${{ vars.BRAIN_URL }}
+          NEXT_PUBLIC_BRAIN_URL: ${{ vars.BRAIN_URL || 'https://nexus-brain-e139.onrender.com' }}
           NEXT_PUBLIC_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
           npm ci
