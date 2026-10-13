@@ -1,8 +1,8 @@
 /* Service worker di Nexus: rende il sito un'app installabile e utilizzabile offline.
    - asset statici (/_next/static, font, icone): cache-first, sono versionati
    - dati (/data/*.json) e pagine: network-first, con ripiego sull'ultima copia salvata */
-const VERSION = "nexus-v1";
-const SHELL = ["/", "/temi/", "/journal/", "/altro/", "/manifest.webmanifest", "/icons/icon-192.png"];
+const VERSION = "nexus-v2";
+const SHELL = ["/", "/temi/", "/journal/", "/altro/", "/manifest.json", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

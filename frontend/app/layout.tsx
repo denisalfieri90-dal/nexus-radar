@@ -3,11 +3,13 @@ import { Suspense } from "react";
 import "./globals.css";
 import { Shell } from "@/components/shell";
 import { themeBootScript } from "@/components/theme";
+import { installBootScript } from "@/components/install";
 
 export const metadata: Metadata = {
-  title: { default: "Nexus Radar", template: "%s · Nexus" },
+  title: { default: "Nexus Radar", template: "%s | Nexus" },
   description: "Radar di asimmetrie: dove la sostanza cresce prima dell'attenzione dei media.",
   applicationName: "Nexus",
+  manifest: "/manifest.json",
   appleWebApp: { capable: true, title: "Nexus", statusBarStyle: "black-translucent" },
   icons: {
     icon: [
@@ -33,7 +35,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="it" className="h-full antialiased" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript + installBootScript }} />
+        {/* iOS: necessario per aprire l'app a schermo intero dalla schermata Home */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
       <body className="min-h-full flex flex-col">
         <Suspense>

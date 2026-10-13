@@ -1,33 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BRAIN, Health, KEYS, REPO_URL, stamp, useData, useLocal } from "@/lib/api";
 import { Chevron } from "./dashboard";
 import { RadarMark } from "./shell";
+import { useInstall } from "./install";
 import { ThemeToggle } from "./theme";
-
-type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 
 export function SettingsView() {
   const { data: health } = useData<Health>("health.json");
   const [code, setCode] = useLocal<string>(KEYS.accessCode, "");
   const [draft, setDraft] = useState("");
-  const [install, setInstall] = useState<InstallEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
-  const [ios, setIos] = useState(false);
-
-  useEffect(() => {
-    setInstalled(matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true);
-    setIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
-    const onPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstall(e as InstallEvent);
-    };
-    window.addEventListener("beforeinstallprompt", onPrompt);
-    window.addEventListener("appinstalled", () => setInstalled(true));
-    return () => window.removeEventListener("beforeinstallprompt", onPrompt);
-  }, []);
+  const { event: install, standalone: installed, platform, install: doInstall } = useInstall();
+  const ios = platform === "ios";
 
   return (
     <div className="pt-8 md:pt-12 max-w-[760px]">
@@ -45,12 +31,7 @@ export function SettingsView() {
           <>
             <p className="mb-3">Aggiungi Nexus alla schermata Home: si apre a schermo intero e funziona anche offline con gli ultimi dati.</p>
             <button
-              onClick={async () => {
-                await install.prompt();
-                const r = await install.userChoice;
-                if (r.outcome === "accepted") setInstalled(true);
-                setInstall(null);
-              }}
+              onClick={doInstall}
               className="bg-ink text-paper px-5 min-h-12 inline-flex items-center gap-2"
             >
               <RadarMark size={22} />
@@ -64,7 +45,11 @@ export function SettingsView() {
             <li>Scegli &ldquo;Aggiungi alla schermata Home&rdquo;.</li>
           </ol>
         ) : (
-          <p>Dal menu del browser scegli &ldquo;Installa app&rdquo; oppure &ldquo;Aggiungi alla schermata Home&rdquo;.</p>
+          <ol className="list-decimal pl-5 space-y-1">
+            <li>Apri questa pagina in Chrome.</li>
+            <li>Tocca il menu ⋮ in alto a destra.</li>
+            <li>Scegli &ldquo;Installa app&rdquo; oppure &ldquo;Aggiungi a schermata Home&rdquo;.</li>
+          </ol>
         )}
       </Section>
 

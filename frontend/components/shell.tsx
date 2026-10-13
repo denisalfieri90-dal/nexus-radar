@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Health, stamp, useData } from "@/lib/api";
+import { InstallPrompt } from "./install";
 import { ThemeToggle } from "./theme";
 
 const NAV = [
@@ -90,6 +91,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </footer>
 
+      <InstallPrompt />
       <nav
         className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-paper/95 backdrop-blur-md border-t border-rule safe-bottom"
         aria-label="Sezioni principali"
