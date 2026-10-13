@@ -40,7 +40,7 @@ GROUPS = {
 
 
 def run(name: str) -> dict:
-    names = GROUPS.get(name, [name])
+    names = GROUPS.get(name) or [n.strip() for n in name.split(",") if n.strip()]
     results = {}
     for n in names:
         if n not in JOBS:

@@ -20,6 +20,7 @@ from .base import client, get_json, record_run, upsert_metric
 
 API = "https://api.gdeltproject.org/api/v2/doc/doc"
 PAUSE = 5.5
+BUDGET_SECONDS = 15 * 60  # tetto complessivo: GDELT a volte rallenta molto gli IP dei runner
 
 
 def _parse_ts(s: str) -> datetime:
@@ -27,7 +28,7 @@ def _parse_ts(s: str) -> datetime:
 
 
 def _timeline(c, query: str, mode: str, timespan: str = "3months") -> dict:
-    data = get_json(c, API, {"query": query, "mode": mode, "format": "json", "timespan": timespan})
+    data = get_json(c, API, {"query": query, "mode": mode, "format": "json", "timespan": timespan}, retries=1, pause=6)
     by_day: dict = defaultdict(list)
     for series in data.get("timeline", []):
         for pt in series.get("data", []):
@@ -46,6 +47,7 @@ def _articles(c, query: str, timespan: str = "24h", maxrecords: int = 25) -> lis
         c, API,
         {"query": f"{query} sourcelang:english", "mode": "artlist", "format": "json",
          "timespan": timespan, "maxrecords": maxrecords, "sort": "datedesc"},
+        retries=1, pause=6,
     )
     return data.get("articles", []) or []
 
@@ -69,9 +71,17 @@ def run(db: Session) -> None:
     targets = [(t.slug, t.gdelt_query, t.overton) for t in THEMES] + [
         (f"choke:{k}", v["query"], True) for k, v in CHOKEPOINTS.items()
     ]
-    total, errors = 0, []
-    with client() as c:
+    # rotazione: se il tempo finisce, il giro successivo riparte dai temi rimasti indietro
+    shift = (datetime.utcnow().hour // 2) % len(targets)
+    targets = targets[shift:] + targets[:shift]
+    total, errors, done = 0, [], 0
+    started = time.monotonic()
+    with client(timeout=20) as c:
         for channel, query, with_tone in targets:
+            if time.monotonic() - started > BUDGET_SECONDS:
+                errors.append(f"tempo esaurito: {len(targets) - done} temi rinviati al prossimo giro")
+                break
+            done += 1
             try:
                 for d, v in _timeline(c, query, "timelinevolraw").items():
                     upsert_metric(db, f"attention:{channel}", d, v, "gdelt")

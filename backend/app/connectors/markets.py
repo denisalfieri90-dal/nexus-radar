@@ -40,7 +40,7 @@ def compute_snapshot(hist: pd.DataFrame, bench_ret_3m: float | None = None) -> d
 def fetch_history(ticker: str, period: str = "14mo") -> pd.DataFrame:
     import yfinance as yf
 
-    hist = yf.Ticker(ticker).history(period=period, auto_adjust=True)
+    hist = yf.Ticker(ticker).history(period=period, auto_adjust=True, timeout=20)
     if hist is None or hist.empty:
         raise RuntimeError(f"nessun dato per {ticker}")
     hist.index = pd.to_datetime(hist.index).tz_localize(None)

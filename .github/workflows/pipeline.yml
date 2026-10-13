@@ -29,7 +29,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     env:
       DATABASE_URL: sqlite:///./nexus.db
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -68,11 +68,27 @@ jobs:
       - name: Installa il backend
         run: pip install -r backend/requirements.txt
 
-      - name: Raccogli e calcola
+      - name: Raccogli notizie e attenzione mediatica
+        if: steps.plan.outputs.group == 'all' || steps.plan.outputs.group == 'news'
+        continue-on-error: true
+        timeout-minutes: 20
+        working-directory: backend
+        run: python -m app.cli run rss,gdelt
+
+      - name: Raccogli mercati, filing, contratti e macro
+        if: steps.plan.outputs.group == 'all' || steps.plan.outputs.group == 'daily'
+        continue-on-error: true
+        timeout-minutes: 20
+        working-directory: backend
+        run: python -m app.cli run markets,edgar,contracts,github,fred
+
+      - name: Calcola punteggi, journal e briefing automatici
         if: steps.plan.outputs.group != 'nessuno' && steps.plan.outputs.group != ''
+        continue-on-error: true
+        timeout-minutes: 15
         working-directory: backend
         run: |
-          python -m app.cli run ${{ steps.plan.outputs.group }}
+          python -m app.cli run score,journal_evaluate,journal_autolog
           if [ "${{ steps.plan.outputs.group }}" != "news" ]; then python -m app.cli brief-top 3; fi
 
       - name: Esporta i dati per il sito
