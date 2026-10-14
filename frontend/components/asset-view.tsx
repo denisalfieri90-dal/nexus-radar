@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { KEYS, Point, QUADRANTS, Score, WatchItem, getData, num, pct, safeName, useData, useLocal, utc } from "@/lib/api";
+import { KEYS, Point, Score, WatchItem, getData, num, pct, safeName, useData, useLocal, utc } from "@/lib/api";
+import { verdictOf } from "@/lib/verdict";
 import { BriefButton } from "./brief-button";
+import { ScoreRing, VerdictBadge } from "./verdict-ui";
 import { AxisBars, ErrorBox, EvidenceTable, Flags, LineChart, Loading, QuadrantTag } from "./ui";
 
 type Asset = {
@@ -29,6 +31,7 @@ export function AssetView() {
   if (loading || !data) return <Loading what={t} />;
   const s = data.score;
   const snap = data.snapshot;
+  const v = s ? verdictOf({ ...s, ret_3m: snap?.ret_3m as number | null, ret_1m: snap?.ret_1m as number | null }) : null;
   const watched = watch.find((w) => w.ticker === data.ticker);
 
   async function toggleWatch() {
@@ -55,28 +58,53 @@ export function AssetView() {
       <Link href={`/tema/?s=${data.theme}`} className="inline-flex items-center min-h-10 text-sm underline decoration-rule hover:decoration-ink">
         {data.theme_name}
       </Link>
-      <header className="grid grid-cols-[1fr_auto] gap-4 items-end border-b border-ink pb-5">
+      <header className="flex items-end justify-between gap-4">
         <div className="min-w-0">
           <h1 className="display text-[clamp(3rem,12vw,6rem)] break-words">{data.ticker}</h1>
           <p className="text-lg md:text-xl mt-1">{data.name}</p>
         </div>
-        {s && (
-          <div className="text-right">
-            <p className="display text-[3.4rem] md:text-[4.6rem] leading-none" style={{ color: QUADRANTS[s.quadrant].color }}>
-              {Math.round(s.asymmetry)}
-            </p>
-            <p className="text-sm mt-1">asimmetria</p>
-            <p className="text-sm"><QuadrantTag q={s.quadrant} /></p>
-          </div>
-        )}
+        {v && s && <ScoreRing value={s.asymmetry} color={v.color} size={84} />}
       </header>
+
+      {v && s && (
+        <section
+          aria-label="Verdetto"
+          className="mt-5 rounded-2xl px-5 py-4 border"
+          style={{ background: v.soft, borderColor: `color-mix(in srgb, ${v.color} 35%, transparent)` }}
+        >
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <VerdictBadge v={v} size="lg" />
+            <span className="font-semibold">{v.short}</span>
+            <span className="text-sm ml-auto" style={{ color: "var(--muted-text)" }}>
+              Quadrante <QuadrantTag q={s.quadrant} />
+            </span>
+          </div>
+          <p className="mt-2 max-w-[62ch]">{v.meaning}</p>
+          {v.reasons.length > 0 && (
+            <ul className="mt-3 grid sm:grid-cols-3 gap-2">
+              {v.reasons.map((x) => (
+                <li key={x.text} className="flex gap-2 items-start rounded-xl bg-paper/70 px-3 py-2 text-sm leading-snug">
+                  <span aria-hidden className="font-bold" style={{ color: x.good ? "var(--seaglass)" : "var(--buoy)" }}>
+                    {x.good ? "+" : "−"}
+                  </span>
+                  <span>
+                    <span className="sr-only">{x.good ? "A favore: " : "Contro: "}</span>
+                    {x.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="text-xs mt-3" style={{ color: "var(--muted-text)" }}>Indica cosa vale la pena studiare, non cosa comprare.</p>
+        </section>
+      )}
 
       <div className="flex flex-col sm:flex-row sm:items-start gap-3 my-6">
         <BriefButton target={{ ticker: data.ticker }} label="Genera briefing" />
         <button
           onClick={toggleWatch}
           aria-pressed={!!watched}
-          className={`w-full sm:w-auto px-5 min-h-12 border inline-flex items-center justify-center gap-2 ${watched ? "border-seaglass text-seaglass bg-seaglass-soft" : "border-ink"}`}
+          className={`w-full sm:w-auto px-5 min-h-12 rounded-full font-semibold border inline-flex items-center justify-center gap-2 ${watched ? "border-seaglass text-seaglass bg-seaglass-soft" : "border-ink"}`}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill={watched ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden>
             <path d="M6 3h12v18l-6-4-6 4z" strokeLinejoin="round" />
@@ -85,7 +113,7 @@ export function AssetView() {
         </button>
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-10">
         <section aria-labelledby="prezzo">
           <h2 id="prezzo" className="display text-[1.8rem] mb-2">Prezzo, ultimi 12 mesi</h2>
           <LineChart points={data.prices} label={`Prezzo di ${data.ticker}`} />

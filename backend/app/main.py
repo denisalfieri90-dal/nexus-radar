@@ -106,6 +106,9 @@ def radar(db: Session = Depends(get_db)):
         out.append(_score_dict(s) | {
             "name": a.name if a else s.entity_id, "kind": a.kind if a else "", "theme_name": themes[s.theme].name,
             "price": snap.price if snap else None, "ret_3m": snap.ret_3m if snap else None,
+            "ret_1m": snap.ret_1m if snap else None,
+            # mini-grafico: ~3 mesi di chiusure, una ogni due sedute
+            "spark": [round(v, 4) for _, v in series(db, f"px:{s.entity_id}", 95)][::2],
         })
     return sorted(out, key=lambda x: -x["asymmetry"])
 

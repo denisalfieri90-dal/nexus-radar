@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Health, stamp, useData } from "@/lib/api";
+import { Health, prefetchData, stamp, useData } from "@/lib/api";
 import { InstallPrompt } from "./install";
 import { ThemeToggle } from "./theme";
 
@@ -32,6 +32,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
+    // dati delle sezioni principali in anticipo: cambiare scheda è istantaneo
+    const warm = () => ["radar.json", "decoder.json", "themes.json", "journal_stats.json", "journal.json", "geo.json"].forEach(prefetchData);
+    const w = window as unknown as { requestIdleCallback?: (cb: () => void) => void };
+    if (w.requestIdleCallback) w.requestIdleCallback(warm);
+    else setTimeout(warm, 800);
   }, []);
 
   return (
@@ -82,7 +87,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main id="contenuto" className="flex-1 w-full max-w-[1320px] mx-auto px-4 md:px-8 pb-28 md:pb-16">
-        {children}
+        <div key={path} className="page-in">
+          {children}
+        </div>
       </main>
 
       <footer className="hidden md:block border-t border-rule">

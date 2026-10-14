@@ -72,7 +72,7 @@ export function BriefingView() {
             </tbody>
           </table>
         )}
-        <div className="grid md:grid-cols-2 gap-6 mt-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
           <div className="border-l-2 border-seaglass pl-4">
             <h3 className="font-semibold">Se va bene</h3>
             <p className="prose-brief text-base mt-1">{ta.scenario_rialzista}</p>
@@ -99,7 +99,7 @@ export function BriefingView() {
         <p className="inline-flex items-center gap-2 text-sm border px-2 py-0.5 mb-4" style={{ borderColor: STATO_COLOR[dn.stato], color: STATO_COLOR[dn.stato] }}>
           {dn.stato}
         </p>
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="font-semibold">Cosa raccontano i media</h3>
             <p className="prose-brief text-base mt-1">{dn.narrativa_mainstream}</p>
@@ -165,11 +165,11 @@ export function BriefingView() {
         )}
         <div className="flex flex-wrap gap-3 mt-6 items-center">
           {data.ticker ? (
-            <Link href={`/asset/?t=${encodeURIComponent(data.ticker)}`} className="bg-ink text-paper px-5 min-h-12 inline-flex items-center">
+            <Link href={`/asset/?t=${encodeURIComponent(data.ticker)}`} className="bg-ink text-paper px-5 min-h-12 rounded-full font-semibold inline-flex items-center">
               Apri la scheda di {data.ticker}
             </Link>
           ) : data.theme ? (
-            <Link href={`/tema/?s=${data.theme}`} className="bg-ink text-paper px-5 min-h-12 inline-flex items-center">
+            <Link href={`/tema/?s=${data.theme}`} className="bg-ink text-paper px-5 min-h-12 rounded-full font-semibold inline-flex items-center">
               Apri il tema
             </Link>
           ) : null}

@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { QUADRANTS, RadarRow, pct } from "@/lib/api";
-import { Flags, QuadrantTag } from "./ui";
+import { RadarRow, pct } from "@/lib/api";
+import { verdictOf } from "@/lib/verdict";
+import { Flags } from "./ui";
+import { VerdictBadge } from "./verdict-ui";
 
 /** Carta batimetrica del radar.
  *  In alto a sinistra le acque profonde e silenziose (molta sostanza, poca attenzione):
@@ -145,7 +147,7 @@ export function RadarChart({ rows, labelTop = 12 }: { rows: RadarRow[]; labelTop
 
         {rows.map((r) => {
           const cx = sx(r.heat), cy = sy(r.substance);
-          const meta = QUADRANTS[r.quadrant];
+          const meta = verdictOf(r);
           const on = selected?.entity_id === r.entity_id;
           const angle = (Math.atan2(cy - oy, cx - ox) * 180) / Math.PI; // 0 = destra, 90 = giù
           const delay = animate ? (SWEEP * Math.max(0, angle + 12)) / 108 : 0;
@@ -205,10 +207,10 @@ export function RadarChart({ rows, labelTop = 12 }: { rows: RadarRow[]; labelTop
 
       <div aria-live="polite" className={mobile ? "mt-3" : "absolute right-4 top-14 w-64"}>
         {selected ? (
-          <div className="bg-paper border border-ink px-4 py-3 shadow-[4px_4px_0_var(--contour)] rise">
+          <div className="bg-paper border border-rule rounded-2xl px-4 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)] rise">
             <div className="flex items-baseline justify-between gap-3">
               <p className="display text-[1.7rem]">{selected.entity_id}</p>
-              <QuadrantTag q={selected.quadrant} />
+              <VerdictBadge v={verdictOf(selected)} size="sm" />
             </div>
             <p className="text-sm">{selected.name}</p>
             <p className="text-sm text-muted">{selected.theme_name}</p>

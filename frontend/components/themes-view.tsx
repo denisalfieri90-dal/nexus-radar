@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { NewsItem, Point, Score, num, useData, utc, when } from "@/lib/api";
+import { NewsItem, Point, RadarRow, Score, num, useData, utc, when } from "@/lib/api";
+import { verdictOf } from "@/lib/verdict";
+import { AssetRow } from "./verdict-ui";
 import { BriefButton } from "./brief-button";
 import { Chevron } from "./dashboard";
 import { AxisBars, Empty, ErrorBox, EvidenceTable, Flags, LineChart, Loading, NoData, QuadrantTag, Sparkline } from "./ui";
@@ -21,10 +23,16 @@ type ThemeRow = {
 
 export function ThemesList() {
   const { data, error, loading, missing, reload } = useData<ThemeRow[]>("themes.json");
+  const radar = useData<RadarRow[]>("radar.json");
+  const good: Record<string, number> = {};
+  radar.data?.forEach((r) => {
+    const k = verdictOf(r).key;
+    if (k === "appetibile" || k === "interessante") good[r.theme] = (good[r.theme] ?? 0) + 1;
+  });
   if (missing) return <NoData />;
   if (error) return <ErrorBox message={error} onRetry={reload} />;
   if (loading || !data) return <Loading what="i temi" />;
-  const radar = data.filter((t) => !t.overton);
+  const radarThemes = data.filter((t) => !t.overton);
   const overton = data.filter((t) => t.overton);
   return (
     <div className="pt-8 md:pt-12">
@@ -33,18 +41,27 @@ export function ThemesList() {
         Ogni tema ha un paniere di asset di osservazione e una misura dell&apos;attenzione mediatica globale. La linea mostra quanto se
         ne è parlato negli ultimi tre mesi.
       </p>
-      <ThemeTable rows={radar} />
+      <ThemeTable rows={radarThemes} good={good} />
       <h2 className="display text-[2.2rem] mt-14">Finestra di Overton</h2>
       <p className="mt-2 max-w-[64ch]">
         Narrative che passano da impensabili ad accettate. Qui si misura solo la traiettoria dell&apos;attenzione e del tono, senza
         paniere di asset.
       </p>
-      <ThemeTable rows={overton} />
+      <ThemeTable rows={overton} good={good} />
     </div>
   );
 }
 
-function ThemeTable({ rows }: { rows: ThemeRow[] }) {
+function GoodBadge({ n }: { n?: number }) {
+  if (!n) return null;
+  return (
+    <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[0.72rem] font-semibold align-middle" style={{ background: "var(--seaglass-soft)", color: "var(--seaglass)" }}>
+      {n} da studiare
+    </span>
+  );
+}
+
+function ThemeTable({ rows, good }: { rows: ThemeRow[]; good: Record<string, number> }) {
   return (
     <>
       <ul className="md:hidden mt-5 divide-y divide-rule border-y border-rule">
@@ -52,7 +69,10 @@ function ThemeTable({ rows }: { rows: ThemeRow[] }) {
           <li key={t.slug}>
             <Link href={`/tema/?s=${t.slug}`} className="flex items-center gap-3 py-4 active:bg-paper-2">
               <span className="flex-1 min-w-0">
-                <span className="font-semibold block">{t.name}</span>
+                <span className="font-semibold block">
+                  {t.name}
+                  <GoodBadge n={good[t.slug]} />
+                </span>
                 <span className="text-sm text-muted line-clamp-2">{t.thesis_hint}</span>
                 <span className="flex items-center gap-3 mt-1.5 text-sm">
                   {t.score && <QuadrantTag q={t.score.quadrant} />}
@@ -83,6 +103,7 @@ function ThemeTable({ rows }: { rows: ThemeRow[] }) {
                   <Link href={`/tema/?s=${t.slug}`} className="font-semibold underline decoration-rule hover:decoration-ink">
                     {t.name}
                   </Link>
+                  <GoodBadge n={good[t.slug]} />
                   <p className="text-sm text-muted mt-0.5">{t.thesis_hint}</p>
                 </td>
                 <td className="py-3 pr-4">
@@ -118,10 +139,14 @@ type ThemeDetail = {
 export function ThemeDetailView() {
   const slug = useSearchParams().get("s") ?? "";
   const { data, error, loading, missing, reload } = useData<ThemeDetail>(slug ? `themes/${slug}.json` : null);
+  const radar = useData<RadarRow[]>("radar.json");
   if (!slug || missing) return <ErrorBox message="Tema non trovato." />;
   if (error) return <ErrorBox message={error} onRetry={reload} />;
   if (loading || !data) return <Loading what="il tema" />;
   const s = data.theme_score;
+  const basket = (radar.data ?? [])
+    .filter((r) => r.theme === data.slug)
+    .sort((a, b) => verdictOf(a).rank - verdictOf(b).rank || b.asymmetry - a.asymmetry);
 
   return (
     <article className="pt-6 md:pt-8">
@@ -132,7 +157,7 @@ export function ThemeDetailView() {
         <BriefButton target={{ theme: data.slug }} label="Genera briefing sul tema" />
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_300px] gap-10 mt-10">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-10 mt-10">
         <section>
           <h2 className="display text-[1.8rem] mb-2">Copertura mediatica</h2>
           <LineChart points={data.attention} color="var(--buoy)" label="Attenzione mediatica" />
@@ -165,46 +190,13 @@ export function ThemeDetailView() {
       {data.assets.length > 0 && (
         <section className="mt-12">
           <h2 className="display text-[1.8rem] mb-3">Paniere di osservazione</h2>
-          <ul className="md:hidden divide-y divide-rule border-y border-rule">
-            {[...data.assets].sort((a, b) => b.asymmetry - a.asymmetry).map((a) => (
-              <li key={a.entity_id}>
-                <Link href={`/asset/?t=${encodeURIComponent(a.entity_id)}`} className="flex items-center gap-4 py-3.5">
-                  <span className="display text-[1.9rem] w-11 text-right" style={{ color: a.quadrant === "stealth" ? "var(--seaglass)" : undefined }}>
-                    {Math.round(a.asymmetry)}
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="font-semibold">{a.entity_id}</span>
-                    <span className="block text-sm text-muted truncate">{a.name}</span>
-                    <span className="block text-sm mt-0.5"><QuadrantTag q={a.quadrant} /></span>
-                  </span>
-                  <Chevron />
-                </Link>
+          <ul className="divide-y divide-rule border-y border-rule">
+            {basket.map((r) => (
+              <li key={r.entity_id}>
+                <AssetRow r={r} />
               </li>
             ))}
           </ul>
-          <table className="hidden md:table w-full border-collapse text-[0.95rem]">
-            <thead>
-              <tr className="text-left text-muted text-sm border-b border-ink">
-                <th className="py-2 pr-4 font-normal">Asset</th>
-                <th className="py-2 pr-4 font-normal">Quadrante</th>
-                <th className="py-2 pr-4 font-normal text-right">Asimmetria</th>
-                <th className="py-2 font-normal">Segnali</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...data.assets].sort((a, b) => b.asymmetry - a.asymmetry).map((a) => (
-                <tr key={a.entity_id} className="border-b border-rule">
-                  <td className="py-2.5 pr-4">
-                    <Link href={`/asset/?t=${encodeURIComponent(a.entity_id)}`} className="font-semibold underline decoration-rule hover:decoration-ink">{a.entity_id}</Link>
-                    <span className="text-muted ml-2">{a.name}</span>
-                  </td>
-                  <td className="py-2.5 pr-4"><QuadrantTag q={a.quadrant} /></td>
-                  <td className="py-2.5 pr-4 text-right font-semibold">{Math.round(a.asymmetry)}</td>
-                  <td className="py-2.5"><Flags flags={a.flags} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </section>
       )}
 
@@ -213,7 +205,7 @@ export function ThemeDetailView() {
         <EvidenceTable items={s?.evidence ?? []} />
       </section>
 
-      <section className="mt-12 grid lg:grid-cols-2 gap-10">
+      <section className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div>
           <h2 className="display text-[1.8rem] mb-3">Contratti pubblici principali</h2>
           {data.contracts.length ? (

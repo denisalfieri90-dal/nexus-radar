@@ -60,7 +60,7 @@ export function DecoderView() {
       <TodayCard entry={entryOfTheDay()} quadrantOf={quadrantOf} />
 
       <Section id="rumore" title="Rumore e silenzio" intro="Dove l'attenzione dei media si stacca dalla sostanza misurata dal radar.">
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <GapList
             title="Molto rumore, poca sostanza"
             hint="Copertura alta, dati deboli: il terreno dell'entusiasmo indotto e della liquidità d'uscita."
@@ -89,7 +89,7 @@ export function DecoderView() {
             </li>
           ))}
         </ol>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {d.overton.map((o) => (
             <article key={o.slug} className="border-t-2 border-ink pt-3">
               <h3 className="display text-[1.6rem] leading-tight">{o.name}</h3>
@@ -267,7 +267,7 @@ function TwoStories({ themes }: { themes: DecoderTheme[] }) {
               </button>
             ))}
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <HeadlineList title="Cosa raccontano i media" items={current.mainstream} big />
             <HeadlineList title="Cosa dice la contro-narrazione" items={current.alternative} big emptyText="Nessun titolo alternativo su questo tema nelle ultime tre settimane." />
           </div>
@@ -328,7 +328,7 @@ function Almanac({ quadrantOf }: { quadrantOf: Record<string, { name: string; q?
           </button>
         ))}
       </div>
-      <ul className="grid md:grid-cols-2 gap-x-10">
+      <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
         {items.map((e) => (
           <li key={e.id} className="border-t border-rule py-4">
             <details>

@@ -32,7 +32,7 @@ export function SettingsView() {
             <p className="mb-3">Aggiungi Nexus alla schermata Home: si apre a schermo intero e funziona anche offline con gli ultimi dati.</p>
             <button
               onClick={doInstall}
-              className="bg-ink text-paper px-5 min-h-12 inline-flex items-center gap-2"
+              className="bg-ink text-paper px-5 min-h-12 rounded-full font-semibold inline-flex items-center gap-2"
             >
               <RadarMark size={22} />
               Installa Nexus

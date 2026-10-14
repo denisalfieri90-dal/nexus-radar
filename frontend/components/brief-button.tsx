@@ -64,7 +64,7 @@ export function BriefButton({ target, label }: { target: { ticker?: string; them
   return (
     <div className="w-full sm:w-auto">
       {state === "busy" ? (
-        <div className="border border-ink px-4 py-3 min-w-[18rem]" role="status" aria-live="polite">
+        <div className="border border-ink rounded-2xl px-4 py-3 min-w-[18rem]" role="status" aria-live="polite">
           <div className="flex items-center gap-3">
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
               <circle cx="12" cy="12" r="10" fill="none" stroke="var(--contour)" strokeWidth="2" />
@@ -79,7 +79,7 @@ export function BriefButton({ target, label }: { target: { ticker?: string; them
         </div>
       ) : state === "ask" ? (
         <form
-          className="border border-ink px-4 py-3 max-w-md"
+          className="border border-ink rounded-2xl px-4 py-3 max-w-md"
           onSubmit={(e) => {
             e.preventDefault();
             if (code.trim()) run(code.trim());
@@ -100,7 +100,7 @@ export function BriefButton({ target, label }: { target: { ticker?: string; them
               aria-describedby={error ? "code-error" : undefined}
               autoFocus
             />
-            <button type="submit" className="bg-ink text-paper px-4 min-h-11">
+            <button type="submit" className="bg-ink text-paper rounded-full px-4 min-h-11 font-semibold">
               Genera
             </button>
           </div>
@@ -112,7 +112,7 @@ export function BriefButton({ target, label }: { target: { ticker?: string; them
         </form>
       ) : (
         <>
-          <button onClick={start} className="w-full sm:w-auto bg-ink text-paper px-5 min-h-12 inline-flex items-center justify-center gap-2 hover:opacity-90">
+          <button onClick={start} className="w-full sm:w-auto bg-ink text-paper px-5 min-h-12 rounded-full font-semibold inline-flex items-center justify-center gap-2 hover:opacity-90">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
               <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" strokeLinecap="round" />
             </svg>

@@ -22,6 +22,12 @@
   --buoy-soft: #f1d6cf;
   --focus: #275f7a;
   --glow: transparent;
+  /* testo su fondi tinti: più scuro per restare leggibile (AA) */
+  --seaglass-text: #155443;
+  --depth-text: #1d4a60;
+  --sand-text: #6e5214;
+  --buoy-text: #8f2a19;
+  --muted-text: #3f515b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -42,6 +48,11 @@
     --buoy-soft: #3b1f1b;
     --focus: #74b6d6;
     --glow: rgba(95, 208, 176, 0.35);
+    --seaglass-text: var(--seaglass);
+    --depth-text: var(--depth);
+    --sand-text: var(--sand);
+    --buoy-text: var(--buoy);
+    --muted-text: var(--ink);
   }
 }
 
@@ -62,6 +73,11 @@
   --buoy-soft: #3b1f1b;
   --focus: #74b6d6;
   --glow: rgba(95, 208, 176, 0.35);
+  --seaglass-text: var(--seaglass);
+  --depth-text: var(--depth);
+  --sand-text: var(--sand);
+  --buoy-text: var(--buoy);
+  --muted-text: var(--ink);
 }
 
 @theme inline {
@@ -220,6 +236,21 @@ a {
   transform-origin: center;
   opacity: 0;
   animation: ring 1.4s ease-out forwards;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.page-in {
+  animation: page-in 0.22s ease-out both;
 }
 
 .rise {
