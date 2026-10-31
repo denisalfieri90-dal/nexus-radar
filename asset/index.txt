@@ -1,0 +1,27 @@
+1:"$Sreact.fragment"
+2:"$Sreact.suspense"
+3:"/_next/static/chunks/418a0ip7ns40e.js"
+4:I[138,["$3"],"Shell"]
+5:I[39756,["$3"],"default"]
+6:I[37457,["$3"],"default"]
+7:"/_next/static/chunks/0zltdme_d4_o_.js"
+8:I[36768,["$3","$7"],"default"]
+c:"/_next/static/chunks/2uaunro2fs-5l.js"
+d:I[69112,["$3","$c"],"AssetView"]
+e:I[97367,["$3"],"OutletBoundary"]
+10:"ViewportBoundary"
+11:I[97367,["$3"],"$10"]
+13:"MetadataBoundary"
+14:I[97367,["$3"],"$13"]
+16:I[68027,["$3"],"default",1]
+:HL["/_next/static/chunks/1k4g2yp39xf5d.css","style"]
+:HC["/",""]
+a:X
+b:[["children",{"s":"__PAGE__","h":512,"d":{"r":["$","$1","c",{"children":[["$","$2",null,{"children":["$","$Ld",null,{}]}],[["$","script","script-0",{"src":"/_next/static/chunks/2uaunro2fs-5l.js","async":true,"nonce":"$undefined"}]],["$","$Le",null,{"children":["$","$2",null,{"name":"Next.MetadataOutlet","children":"$@f"}]}]]}],"p":false,"v":null}}]]
+9:[["children",{"s":"asset","h":512,"d":{"r":["$","$1","c",{"children":[null,["$","$L5",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L6",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],"p":false,"v":"$a"},"c":"$Qb"}]]
+0:{"P":null,"c":["","asset",""],"q":"","i":false,"t":{"t":{"s":"","h":528,"d":{"r":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/1k4g2yp39xf5d.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/_next/static/chunks/418a0ip7ns40e.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"it","className":"h-full antialiased","suppressHydrationWarning":true,"children":[["$","head",null,{"children":[["$","script",null,{"dangerouslySetInnerHTML":{"__html":"(function(){try{var t=localStorage.getItem('nexus-theme');if(t==='\"light\"'||t==='\"dark\"'){document.documentElement.dataset.theme=JSON.parse(t)}}catch(e){}})();window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__nexusInstall=e;window.dispatchEvent(new Event('nexus-install-ready'))});"}}],["$","meta",null,{"name":"apple-mobile-web-app-capable","content":"yes"}]]}],["$","body",null,{"className":"min-h-full flex flex-col","children":["$","$2",null,{"children":["$","$L4",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L6",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","$L8",null,{}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]}]]}]]}],"p":false,"v":null},"c":"$Q9"},"h":{"r":["$","$1","h",{"children":[null,["$","$L11",null,{"children":"$L12"}],["$","$L14",null,{"children":[["$","div",null,{"hidden":true,"children":["$","$2",null,{"name":"Next.Metadata","children":"$L15"}]}],null]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"p":false,"v":null}},"m":"$undefined","G":["$16",[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/1k4g2yp39xf5d.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"r":"$undefined","s":"$undefined","a":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"e0V1r4rPNJ4cXi9bb23l5"}
+a:C
+12:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1, viewport-fit=cover"}],["$","meta","2",{"name":"theme-color","content":"#e9ede7","media":"(prefers-color-scheme: light)"}],["$","meta","3",{"name":"theme-color","content":"#0b1d2b","media":"(prefers-color-scheme: dark)"}]]
+17:I[27201,["$3"],"IconMark"]
+f:null
+15:[["$","title","0",{"children":"Nexus Radar"}],["$","meta","1",{"name":"description","content":"Radar di asimmetrie: dove la sostanza cresce prima dell'attenzione dei media."}],["$","meta","2",{"name":"application-name","content":"Nexus"}],["$","link","3",{"rel":"manifest","href":"/manifest.json","crossOrigin":"$undefined"}],["$","meta","4",{"name":"format-detection","content":"telephone=no"}],["$","meta","5",{"name":"mobile-web-app-capable","content":"yes"}],["$","meta","6",{"name":"apple-mobile-web-app-title","content":"Nexus"}],["$","meta","7",{"name":"apple-mobile-web-app-status-bar-style","content":"black-translucent"}],["$","link","8",{"rel":"icon","href":"/icons/favicon-32.png","sizes":"32x32","type":"image/png"}],["$","link","9",{"rel":"icon","href":"/icons/icon-192.png","sizes":"192x192","type":"image/png"}],["$","link","10",{"rel":"apple-touch-icon","href":"/icons/apple-touch-icon.png","sizes":"180x180"}],["$","$L17","11",{}]]
